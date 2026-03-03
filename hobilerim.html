@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hobilerim — Şeyma Bayram</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400&family=Nunito:wght@300;400;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #FDF8F4;
+      color: #3D3530;
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 56px; height: 70px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(253,248,244,0.90);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(180,160,140,0.18);
+    }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #3D3530; text-decoration: none; }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: #8A7A72; text-decoration: none;
+      transition: color 0.3s; position: relative; padding-bottom: 2px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 2px; background: #F2C4C4;
+      border-radius: 2px; transition: width 0.35s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: #3D3530; }
+    .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+    .hobi-hero {
+      margin-top: 70px;
+      background: linear-gradient(135deg, #FAE8E8 0%, #ECEAF9 50%, #E4F4EF 100%);
+      padding: 80px;
+      position: relative; overflow: hidden;
+      border-bottom: 1px solid rgba(180,160,140,0.15);
+    }
+    .hobi-hero::before {
+      content: '✦';
+      position: absolute; font-size: 22rem;
+      color: rgba(255,255,255,0.4);
+      right: -30px; top: -90px;
+      pointer-events: none; line-height: 1;
+    }
+    .hero-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: white; color: #C07070;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      padding: 7px 18px; border-radius: 50px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(180,140,120,0.12);
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 4vw, 3.8rem);
+      font-weight: 300; line-height: 1.15;
+      margin-bottom: 16px; color: #3D3530;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero-title em { font-style: italic; color: #9090C0; }
+    .hero-desc {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; font-weight: 300;
+      color: #8A7A72; line-height: 1.8; max-width: 500px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hobi-section { padding: 64px 80px; }
+    .hobi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .hobi-card {
+      border-radius: 24px; padding: 36px 30px;
+      position: relative; overflow: hidden;
+      transition: transform 0.35s, box-shadow 0.35s;
+      cursor: default; animation: fadeUp 0.5s ease both;
+    }
+    .hobi-card:nth-child(1) { background: #FAE8E8; animation-delay: 0.05s; }
+    .hobi-card:nth-child(2) { background: #ECEAF9; animation-delay: 0.10s; }
+    .hobi-card:nth-child(3) { background: #E4F4EF; animation-delay: 0.15s; }
+    .hobi-card:nth-child(4) { background: #FDF0E4; animation-delay: 0.20s; }
+    .hobi-card:nth-child(5) { background: #EAF2FA; animation-delay: 0.25s; }
+    .hobi-card:nth-child(6) { background: #F4EAF9; animation-delay: 0.30s; }
+    .hobi-card:nth-child(7) { background: #FEF0F6; animation-delay: 0.35s; }
+    .hobi-card:nth-child(8) { background: #F0F4FE; animation-delay: 0.40s; }
+    .hobi-card:nth-child(9) { background: #F0FEF4; animation-delay: 0.45s; }
+    .hobi-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.09);
+    }
+    .card-num {
+      position: absolute; top: 16px; right: 20px;
+      font-family: 'Playfair Display', serif;
+      font-size: 4rem; font-weight: 300;
+      color: rgba(0,0,0,0.06); line-height: 1;
+    }
+    .card-icon { font-size: 2.4rem; margin-bottom: 18px; display: block; }
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem; font-weight: 400;
+      margin-bottom: 10px; color: #3D3530;
+    }
+    .card-desc { font-size: 0.8rem; line-height: 1.7; color: #6A5A52; }
+
+    .map-section {
+      padding: 64px 80px;
+      border-top: 1px solid rgba(180,160,140,0.18);
+      background: linear-gradient(180deg, #FDF8F4 0%, #FAF0F4 100%);
+    }
+    .map-header { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+    .map-pill {
+      width: 36px; height: 8px; border-radius: 50px;
+      background: linear-gradient(90deg, #F2C4C4, #D8D4F0);
+    }
+    .map-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 400; color: #3D3530;
+    }
+    .map-subtitle {
+      font-size: 0.82rem; color: #8A7A72;
+      margin-bottom: 28px; margin-left: 50px; line-height: 1.6;
+    }
+    #map {
+      width: 100%;
+      height: 500px;
+      min-height: 500px;
+      border-radius: 22px;
+      border: 1px solid rgba(180,160,140,0.18);
+      box-shadow: 0 4px 24px rgba(180,140,120,0.10);
+      display: block;
+    }
+    .map-legend {
+      display: flex; gap: 24px; margin-top: 18px; flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; color: #8A7A72;
+    }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    .leaflet-tooltip {
+      background: white !important; border: none !important;
+      border-radius: 10px !important;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+      font-family: 'Nunito', sans-serif !important;
+      font-size: 0.78rem !important;
+      color: #3D3530 !important;
+      padding: 8px 12px !important;
+    }
+    .leaflet-tooltip::before { display: none !important; }
+
+    footer {
+      padding: 28px 80px;
+      border-top: 1px solid rgba(180,160,140,0.15);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    footer p { font-size: 0.72rem; color: #8A7A72; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #FDF8F4; }
+    ::-webkit-scrollbar-thumb { background: #F2C4C4; border-radius: 10px; }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 24px; }
+      .hobi-hero, .hobi-section, .map-section { padding: 48px 24px; }
+      .hobi-grid { grid-template-columns: 1fr; }
+      footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo" style="display:flex;align-items:center;gap:12px;">
+      <div style="
+        width:38px; height:38px;
+        background: linear-gradient(135deg,#F2C4C4 0%,#D8D4F0 100%);
+        border-radius:12px;
+        display:flex; align-items:center; justify-content:center;
+        box-shadow: 0 2px 10px rgba(180,140,120,0.18);
+        flex-shrink:0;
+      ">
+        <span style="
+          font-family:'Playfair Display',serif;
+          font-size:1rem; font-weight:400; font-style:italic;
+          color:white; letter-spacing:-1px;
+          text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        ">ŞB</span>
+      </div>
+      <span>Şeyma Bayram</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Hakkımda</a></li>
+      <li><a href="hobilerim.html" class="active">Hobilerim</a></li>
+      <li><a href="iletisim.html">İletişim</a></li>
+    </ul>
+  </nav>
+
+  <div class="hobi-hero">
+    <p class="hero-label">✦ İlgi Alanlarım</p>
+    <h1 class="hero-title">Hayatı renklendiren<br><em>tutkularım</em></h1>
+    <p class="hero-desc">Mimarlık dışında da yaşamı güzelleştiren birçok ilgi alanım var. Tasarımdan seyahate, doğadan fotoğrafa uzanan geniş bir dünyam.</p>
+  </div>
+
+  <div class="hobi-section">
+    <div class="hobi-grid">
+
+      <div class="hobi-card">
+        <span class="card-num">01</span>
+        <span class="card-icon">🏛️</span>
+        <p class="card-title">Mimari Geziler</p>
+        <p class="card-desc">Tarihi yapıları ve çağdaş mimarlık eserlerini yerinde incelemek, kentsel dokuyu yakından deneyimlemek için seyahat ediyorum.</p>
+      </div>
+
+      <div class="hobi-card">
+        <span class="card-num">02</span>
+        <span class="card-icon">✏️</span>
+        <p class="card-title">Tasarım & Çizim</p>
+        <p class="card-desc">El çizimi eskizler yapmak ve dijital tasarım araçlarıyla yaratıcı projeler üretmek en büyük tutkularımdan biri.</p>
+      </div>
+
+      <div class="hobi-card">
+        <span class="card-num">03</span>
+        <span class="card-icon">📚</span>
+        <p class="card-title">Okuma</p>
+        <p class="card-desc">Mimarlık tarihi, kentsel dönüşüm ve sürdürülebilirlik konularındaki kitap ve makaleler okumayı çok severim.</p>
+      </div>
+
+      <div class="hobi-card">
+        <span class="card-num">04</span>
+        <span class="card-icon">🌿</span>
+        <p class="card-title">Sürdürülebilirlik</p>
+        <p class="card-desc">Sıfır atık ve geri dönüşüm konularına duyarlıyım; çevre dostu yaşam pratiklerini günlük hayatıma taşıyorum.</p>
+      </div>
+
+      <div class="hobi-card">
+        <span class="card-num">05</span>
+        <span class="card-icon">📸</span>
+        <p class="card-title">Fotoğraf</p>
+        <p class="card-desc">Mimari detayları, kentsel peyzajı ve günlük yaşamın sıradan güzelliklerini fotoğraflamaktan keyif alıyorum.</p>
+      </div>
+
+      <div class="hobi-card">
+        <span class="card-num">06</span>
+        <span class="card-icon">🗺️</span>
+        <p class="card-title">Seyahat</p>
+        <p class="card-desc">Farklı kültürlerin mimarisini keşfetmek için yurt içi ve yurt dışı geziler planlıyorum.</p>
+      </div>
+
+      <div class="hobi-card">
+        <span class="card-num">07</span>
+        <span class="card-icon">🎭</span>
+        <p class="card-title">Tiyatro</p>
+        <p class="card-desc">Sahne sanatlarının büyüsüne kapılmış biri olarak tiyatro oyunlarını takip ediyor, farklı yorumları yerinde izlemeyi seviyorum.</p>
+      </div>
+
+      <div class="hobi-card">
+        <span class="card-num">08</span>
+        <span class="card-icon">🎬</span>
+        <p class="card-title">Sinema & Film</p>
+        <p class="card-desc">Mimari mekânları ve kentsel atmosferi ustalıkla kullanan filmleri izlemek, sinema dilini keşfetmek en büyük zevklerimden.</p>
+      </div>
+
+      <div class="hobi-card">
+        <span class="card-num">09</span>
+        <span class="card-icon">🧩</span>
+        <p class="card-title">Puzzle</p>
+        <p class="card-desc">Yüzlerce parçadan bütünü oluşturmanın verdiği tatmin duygusu, sabır ve odaklanma gerektiren puzzle çözmeyi vazgeçilmez bir hobi haline getirdi.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="map-section">
+    <div class="map-header">
+      <div class="map-pill"></div>
+      <h2 class="map-title">Seyahat Haritam</h2>
+    </div>
+    <p class="map-subtitle">Yaşadığım, çalıştığım ve ziyaret ettiğim şehirler — üzerlerine gelin.</p>
+    <div id="map"></div>
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#C07070;"></div><span>Yaşadığım / Çalıştığım</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#9090C0;"></div><span>Eğitim</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#60A080;"></div><span>Ziyaret Ettim</span></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Şeyma Bayram</p>
+    <p>Hacettepe Üniversitesi · Web CBS Ödev–1</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    window.addEventListener('load', function() {
+      const map = L.map('map', { center:[38.8, 36.5], zoom:6 });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+
+      setTimeout(function(){ map.invalidateSize(); }, 300);
+
+      function makePhotoIcon(img, color) {
+        return L.divIcon({
+          className: '',
+          html: `
+            <div style="
+              width:60px; height:60px;
+              border-radius:50%;
+              border:3px solid ${color};
+              overflow:hidden;
+              box-shadow:0 4px 14px rgba(0,0,0,0.25);
+              background:${color};
+              position:relative;
+            ">
+              <img src="${img}" alt=""
+                style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;"
+                onerror="this.style.display='none'" />
+            </div>
+          `,
+          iconSize:[60,60], iconAnchor:[30,30], popupAnchor:[0,-34]
+        });
+      }
+
+      const yerler = [
+        { coords:[39.9334,32.8597], name:'Ankara', desc:'Yaşadığım yer', color:'#C07070',
+          img:'images/ankara.jpg' },
+        { coords:[37.8667,32.4833], name:'Konya', desc:'Staj & Yüksek Lisans', color:'#C07070',
+          img:'images/konya.jpg' },
+        { coords:[37.9667,34.6833], name:'Niğde', desc:'Lisans & Staj', color:'#9090C0',
+          img:'images/nigde.jpg' },
+        { coords:[37.8560,27.8416], name:'Aydın', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/aydın.jpg' },
+        { coords:[39.7767,30.5206], name:'Eskişehir', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/eskisehir.jpg' },
+        { coords:[38.6939,34.6857], name:'Nevşehir', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/nevsehir.jpg' },
+        { coords:[38.7312,35.4787], name:'Kayseri', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/kayseri.jpg' },
+        { coords:[37.0000,35.3213], name:'Adana', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/adana.jpg' },
+        { coords:[36.3960,36.1619], name:'Hatay', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/hatay.jpg' },
+        { coords:[37.3212,40.7245], name:'Mardin', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/mardin.jpg' },
+        { coords:[37.1591,38.7969], name:'Şanlıurfa', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/sanliurfa.jpg' },
+        { coords:[37.9144,40.2300], name:'Diyarbakır', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/diyarbakir.jpg' },
+        { coords:[37.8812,41.1351], name:'Batman', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/batman.jpg' },
+        { coords:[37.0662,37.3833], name:'Gaziantep', desc:'Ziyaret ettim', color:'#60A080',
+          img:'images/gaziantep.jpg' },
+      ];
+
+      yerler.forEach(p => {
+        L.marker(p.coords, { icon: makePhotoIcon(p.img, p.color) })
+          .addTo(map)
+          .bindTooltip(`<strong>${p.name}</strong><br><small>${p.desc}</small>`, {
+            direction: 'top',
+            offset: [0, -34],
+          });
+      });
+    });
+  </script>
+
+</body>
+</html>

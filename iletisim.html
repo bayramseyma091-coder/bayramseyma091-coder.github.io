@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>İletişim — Şeyma Bayram</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400&family=Nunito:wght@300;400;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #FDF8F4;
+      color: #3D3530;
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 56px; height: 70px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(253,248,244,0.90);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(180,160,140,0.18);
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: #8A7A72; text-decoration: none;
+      transition: color 0.3s; position: relative; padding-bottom: 2px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 2px; background: #F2C4C4;
+      border-radius: 2px; transition: width 0.35s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: #3D3530; }
+    .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+    .iletisim-hero {
+      margin-top: 70px;
+      background: linear-gradient(135deg, #E4F4EF 0%, #ECEAF9 50%, #FAE8E8 100%);
+      padding: 80px;
+      position: relative; overflow: hidden;
+      border-bottom: 1px solid rgba(180,160,140,0.15);
+    }
+    .iletisim-hero::before {
+      content: '✉';
+      position: absolute; font-size: 20rem;
+      color: rgba(255,255,255,0.35);
+      right: 40px; top: -40px;
+      pointer-events: none; line-height: 1;
+    }
+    .hero-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: white; color: #60A080;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      padding: 7px 18px; border-radius: 50px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(180,140,120,0.12);
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 4vw, 3.8rem);
+      font-weight: 300; line-height: 1.15;
+      margin-bottom: 16px; color: #3D3530;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero-title em { font-style: italic; color: #60A080; }
+    .hero-desc {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; font-weight: 300;
+      color: #8A7A72; line-height: 1.8; max-width: 500px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .contact-section { padding: 64px 80px; }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .contact-card {
+      background: white; border-radius: 22px;
+      padding: 28px 32px;
+      box-shadow: 0 2px 18px rgba(180,140,120,0.08);
+      text-decoration: none; color: inherit;
+      transition: all 0.3s;
+      display: flex; align-items: center; gap: 20px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .contact-card:nth-child(1) { animation-delay: 0.05s; }
+    .contact-card:nth-child(2) { animation-delay: 0.10s; }
+    .contact-card:nth-child(3) { animation-delay: 0.15s; grid-column: 1 / -1; }
+    .contact-card:hover { transform: translateY(-5px); box-shadow: 0 14px 36px rgba(180,140,120,0.16); }
+    .contact-icon {
+      width: 54px; height: 54px; border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; flex-shrink: 0;
+    }
+    .contact-label {
+      font-size: 0.63rem; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: #8A7A72; margin-bottom: 4px;
+    }
+    .contact-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem; color: #3D3530; line-height: 1.5;
+    }
+
+    .map-section {
+      padding: 64px 80px;
+      border-top: 1px solid rgba(180,160,140,0.18);
+      background: linear-gradient(180deg, #FDF8F4 0%, #EEF8F4 100%);
+    }
+    .network-section {
+      padding: 64px 80px;
+      border-top: 1px solid rgba(180,160,140,0.18);
+      background: linear-gradient(180deg, #FDF8F4 0%, #F0F0FA 100%);
+    }
+    .map-header { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+    .map-pill { width: 36px; height: 8px; border-radius: 50px; }
+    .map-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 400; color: #3D3530;
+    }
+    .map-subtitle {
+      font-size: 0.82rem; color: #8A7A72;
+      margin-bottom: 28px; margin-left: 50px; line-height: 1.6;
+    }
+    #map {
+      width: 100%; height: 440px; min-height: 440px;
+      border-radius: 22px;
+      border: 1px solid rgba(180,160,140,0.18);
+      box-shadow: 0 4px 24px rgba(180,140,120,0.10);
+      display: block;
+    }
+    #network-map {
+      width: 100%; height: 480px; min-height: 480px;
+      border-radius: 22px 22px 0 0;
+      display: block;
+    }
+    .network-card {
+      background: white; border-radius: 22px;
+      box-shadow: 0 4px 24px rgba(180,140,120,0.10);
+      border: 1px solid rgba(180,160,140,0.18);
+      overflow: hidden;
+    }
+    .network-footer {
+      padding: 18px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 1px solid rgba(180,160,140,0.12);
+      flex-wrap: wrap; gap: 10px;
+    }
+    .coord-info { font-size: 0.75rem; color: #8A7A72; }
+    .coord-info span { color: #9090C0; font-weight: 700; }
+    .filter-btns { display: flex; gap: 8px; }
+    .filter-btn {
+      padding: 7px 18px; border-radius: 50px;
+      border: 2px solid transparent;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.25s;
+      font-family: 'Nunito', sans-serif;
+    }
+    .filter-btn.egitim { background:#ECEAF9; color:#7070B0; border-color:#D8D4F0; }
+    .filter-btn.egitim.active { background:#9090C0; color:white; border-color:#9090C0; }
+    .filter-btn.is { background:#E4F4EF; color:#60A080; border-color:#C4E4D8; }
+    .filter-btn.is.active { background:#60A080; color:white; border-color:#60A080; }
+    .filter-btn.yasam { background:#FAE8E8; color:#C07070; border-color:#F2C4C4; }
+    .filter-btn.yasam.active { background:#C07070; color:white; border-color:#C07070; }
+
+    footer {
+      padding: 28px 80px;
+      border-top: 1px solid rgba(180,160,140,0.15);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    footer p { font-size: 0.72rem; color: #8A7A72; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #FDF8F4; }
+    ::-webkit-scrollbar-thumb { background: #C4E4D8; border-radius: 10px; }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 24px; }
+      .iletisim-hero, .contact-section, .map-section, .network-section { padding: 48px 24px; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .contact-card:nth-child(3) { grid-column: 1; }
+      footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:#3D3530;font-family:'Playfair Display',serif;font-size:1.1rem;">
+      <div style="
+        width:38px; height:38px;
+        background: linear-gradient(135deg,#F2C4C4 0%,#D8D4F0 100%);
+        border-radius:12px;
+        display:flex; align-items:center; justify-content:center;
+        box-shadow: 0 2px 10px rgba(180,140,120,0.18);
+        flex-shrink:0;
+      ">
+        <span style="font-family:'Playfair Display',serif;font-size:1rem;font-style:italic;color:white;letter-spacing:-1px;">ŞB</span>
+      </div>
+      <span>Şeyma Bayram</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Hakkımda</a></li>
+      <li><a href="hobilerim.html">Hobilerim</a></li>
+      <li><a href="iletisim.html" class="active">İletişim</a></li>
+    </ul>
+  </nav>
+
+  <div class="iletisim-hero">
+    <p class="hero-label">✦ İletişim</p>
+    <h1 class="hero-title">Benimle<br><em>iletişime geçin</em></h1>
+    <p class="hero-desc">Mimarlık projeleri, iş birlikleri veya herhangi bir konu için aşağıdaki kanallardan ulaşabilirsiniz.</p>
+  </div>
+
+  <div class="contact-section">
+    <div class="contact-grid">
+      <a href="tel:05330153294" class="contact-card">
+        <div class="contact-icon" style="background:#E4F4EF;">📞</div>
+        <div>
+          <p class="contact-label">Telefon</p>
+          <p class="contact-value">0533 015 32 94</p>
+        </div>
+      </a>
+      <a href="mailto:seyma.bayram@csb.gov.tr" class="contact-card">
+        <div class="contact-icon" style="background:#FAE8E8;">✉️</div>
+        <div>
+          <p class="contact-label">E-posta</p>
+          <p class="contact-value">seyma.bayram@csb.gov.tr</p>
+        </div>
+      </a>
+      <div class="contact-card">
+        <div class="contact-icon" style="background:#ECEAF9;">📍</div>
+        <div>
+          <p class="contact-label">Konum</p>
+          <p class="contact-value">Çevre, Şehircilik ve İklim Değişikliği Bakanlığı<br>Mustafa Kemal Mahallesi, Çankaya / Ankara</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KONUM HARİTASI -->
+  <div class="map-section">
+    <div class="map-header">
+      <div class="map-pill" style="background:linear-gradient(90deg,#C4E4D8,#ECEAF9);"></div>
+      <h2 class="map-title">Konum</h2>
+    </div>
+    <p class="map-subtitle">Mustafa Kemal Mahallesi, Çankaya / Ankara</p>
+    <div id="map"></div>
+  </div>
+
+  <!-- KİŞİSEL AĞ HARİTASI -->
+  <div class="network-section">
+    <div class="map-header">
+      <div class="map-pill" style="background:linear-gradient(90deg,#ECEAF9,#9090C0);"></div>
+      <h2 class="map-title">Kişisel Ağ Haritası</h2>
+    </div>
+    <p class="map-subtitle">Eğitim, staj ve yaşam alanlarım — haritaya tıklayarak koordinat okuyabilirsiniz.</p>
+    <div class="network-card">
+      <div id="network-map"></div>
+      <div class="network-footer">
+        <p class="coord-info" id="coord-display">Koordinat okumak için haritaya tıklayın.</p>
+        <div class="filter-btns">
+          <button class="filter-btn egitim active" onclick="toggleLayer('egitim', this)">Eğitim</button>
+          <button class="filter-btn is active" onclick="toggleLayer('is', this)">Staj / İş</button>
+          <button class="filter-btn yasam active" onclick="toggleLayer('yasam', this)">Yaşam</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Şeyma Bayram</p>
+    <p>Hacettepe Üniversitesi · Web CBS Ödev–1</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    window.onload = function() {
+
+      // ── KONUM HARİTASI ──
+      var map = L.map('map').setView([39.91168, 32.75210], 17);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      var icon = L.divIcon({
+        className: '',
+        html: '<div style="display:flex;flex-direction:column;align-items:center;"><div style="width:42px;height:42px;background:linear-gradient(135deg,#60A080,#9090C0);border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 16px rgba(96,160,128,0.6);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:1.1rem;">🏛️</span></div><div style="width:8px;height:8px;background:rgba(96,160,128,0.4);border-radius:50%;margin-top:2px;"></div></div>',
+        iconSize:[42,52], iconAnchor:[21,52], popupAnchor:[0,-54]
+      });
+
+      L.marker([39.91168, 32.75210], { icon: icon })
+        .addTo(map)
+        .bindPopup('<strong>Şeyma Bayram</strong><br><small>Çevre, Şehircilik ve İklim Değişikliği Bakanlığı<br>Mustafa Kemal Mahallesi</small>')
+        .openPopup();
+
+      setTimeout(function(){ map.invalidateSize(); }, 400);
+
+      // ── KİŞİSEL AĞ HARİTASI ──
+      var networkMap = L.map('network-map').setView([38.5, 33.5], 7);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(networkMap);
+
+      networkMap.on('click', function(e) {
+        document.getElementById('coord-display').innerHTML =
+          'Lat: <span>' + e.latlng.lat.toFixed(5) + '</span> — Lng: <span>' + e.latlng.lng.toFixed(5) + '</span>';
+      });
+
+      var noktalar = [
+        { coords:[39.9334,32.8597], name:'Ankara', desc:'Yaşam & Çalışma Alanı', kategori:'yasam', renk:'#C07070' },
+        { coords:[37.8667,32.4833], name:'Konya', desc:'Staj & Yüksek Lisans', kategori:'is', renk:'#60A080' },
+        { coords:[37.9667,34.6833], name:'Niğde', desc:'Lisans Eğitimi', kategori:'egitim', renk:'#9090C0' },
+      ];
+
+      var baglantilar = [
+        [[39.9334,32.8597],[37.8667,32.4833]],
+        [[37.8667,32.4833],[37.9667,34.6833]],
+        [[39.9334,32.8597],[37.9667,34.6833]],
+      ];
+
+      var cizgiKatman = L.layerGroup().addTo(networkMap);
+      baglantilar.forEach(function(b) {
+        L.polyline(b, { color:'#B0A0C0', weight:2, dashArray:'6,6', opacity:0.6 }).addTo(cizgiKatman);
+      });
+
+      var katmanlar = { egitim: L.layerGroup(), is: L.layerGroup(), yasam: L.layerGroup() };
+
+      noktalar.forEach(function(n) {
+        var nIcon = L.divIcon({
+          className: '',
+          html: '<div style="width:18px;height:18px;background:' + n.renk + ';border:3px solid white;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,0.25);"></div>',
+          iconSize:[18,18], iconAnchor:[9,9], popupAnchor:[0,-12]
+        });
+        L.marker(n.coords, { icon: nIcon })
+          .bindPopup('<strong>' + n.name + '</strong><br><small>' + n.desc + '</small>')
+          .addTo(katmanlar[n.kategori]);
+      });
+
+      Object.values(katmanlar).forEach(function(k){ k.addTo(networkMap); });
+      setTimeout(function(){ networkMap.invalidateSize(); }, 400);
+
+      window.toggleLayer = function(isim, btn) {
+        btn.classList.toggle('active');
+        if (networkMap.hasLayer(katmanlar[isim])) {
+          networkMap.removeLayer(katmanlar[isim]);
+        } else {
+          networkMap.addLayer(katmanlar[isim]);
+        }
+      };
+
+    };
+  </script>
+
+</body>
+</html>
